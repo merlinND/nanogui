@@ -859,6 +859,17 @@ PYBIND11_PLUGIN(nanogui) {
         .def("widgetFontSize", &FormHelper::widgetFontSize, D(FormHelper, widgetFontSize))
         .def("setWidgetFontSize", &FormHelper::setWidgetFontSize, D(FormHelper, setWidgetFontSize));
 
+    /* NanoVG calls (only a subset is supported for now) */
+    {
+        #define M(name) g.def(#name, &name, "")
+        py::module g = m.def_submodule("nvg");
+        M(nvgBeginFrame); M(nvgBeginPath); M(nvgRect); M(nvgFillColor);
+        M(nvgFill); M(nvgFontSize); M(nvgFontFace); M(nvgTextAlign);
+        M(nvgText); M(nvgStrokeColor); M(nvgStrokeWidth); M(nvgStroke);
+        M(nvgTextBoxBounds); M(nvgTextBox); M(nvgEndFrame);
+        #undef M
+    }
+
     /* OpenGL calls (only a subset is supported for now) */
     {
         #define M(name) g.def(#name, &name, "")
