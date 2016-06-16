@@ -2,6 +2,7 @@
 
 #include <nanogui/nanogui.h>
 #include <nanogui/opengl.h>
+#include <nanogui/glutil.h>
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -858,6 +859,87 @@ PYBIND11_PLUGIN(nanogui) {
         .def("setLabelFontSize", &FormHelper::setLabelFontSize, D(FormHelper, setLabelFontSize))
         .def("widgetFontSize", &FormHelper::widgetFontSize, D(FormHelper, widgetFontSize))
         .def("setWidgetFontSize", &FormHelper::setWidgetFontSize, D(FormHelper, setWidgetFontSize));
+
+    py::class_<GLShader, ref<GLShader>>(m, "GLShader", widget, D(GLShader))
+        .def(py::init<>(), D(GLShader, GLShader))
+        .def("init", &GLShader::init, D(GLShader, init),
+             py::arg("name"), py::arg("vertex_str"),
+             py::arg("fragment_str"), py::arg("geometry_str") = "")
+        .def("initFromFiles", &GLShader::initFromFiles, D(GLShader, initFromFiles),
+             py::arg("name"), py::arg("vertex_fname"),
+             py::arg("fragment_fname"), py::arg("geometry_fname") = "")
+
+        .def("name", &GLShader::name, D(GLShader, name))
+        .def("define", &GLShader::define, D(GLShader, define))
+        .def("bind", &GLShader::bind, D(GLShader, bind))
+        .def("free", &GLShader::free, D(GLShader, free))
+        .def("attrib", &GLShader::attrib, D(GLShader, attrib))
+        .def("uniform", &GLShader::uniform, D(GLShader, uniform))
+
+        // TODO: define these templates for appropriate types
+        // .def("uploadAttrib", &GLShader::uploadAttrib, D(GLShader, uploadAttrib))
+        // .def("downloadAttrib", &GLShader::downloadAttrib, D(GLShader, downloadAttrib))
+        // .def("uploadIndices", &GLShader::uploadIndices, D(GLShader, uploadIndices))
+
+        .def("invalidateAttribs", &GLShader::invalidateAttribs, D(GLShader, invalidateAttribs))
+        .def("freeAttrib", &GLShader::freeAttrib, D(GLShader, freeAttrib))
+        .def("hasAttrib", &GLShader::hasAttrib, D(GLShader, hasAttrib))
+        .def("shareAttrib", &GLShader::shareAttrib, D(GLShader, shareAttrib))
+        .def("attribVersion", &GLShader::attribVersion, D(GLShader, attribVersion))
+        .def("resetAttribVersion", &GLShader::resetAttribVersion, D(GLShader, resetAttribVersion))
+
+        .def("drawArray", &GLShader::drawArray, D(GLShader, drawArray))
+        .def("drawIndexed", &GLShader::drawIndexed, D(GLShader, drawIndexed))
+
+        // TODO: define this templates for appropriate types
+        // .def("setUniform", &GLShader::setUniform, D(GLShader, setUniform))
+        .def("bufferSize", &GLShader::bufferSize, D(GLShader, bufferSize));
+
+    py::class_<GLUniformBuffer, ref<GLUniformBuffer>>(m, "GLUniformBuffer", widget, D(GLUniformBuffer))
+        .def(py::init<>(), D(GLUniformBuffer, GLUniformBuffer))
+        .def("init", &GLUniformBuffer::init, D(GLUniformBuffer, init))
+        .def("free", &GLUniformBuffer::free, D(GLUniformBuffer, free))
+        .def("bind", &GLUniformBuffer::bind, D(GLUniformBuffer, bind))
+        .def("release", &GLUniformBuffer::release, D(GLUniformBuffer, release))
+        .def("update", &GLUniformBuffer::update, D(GLUniformBuffer, update))
+        .def("getBindingPoint", &GLUniformBuffer::getBindingPoint, D(GLUniformBuffer, getBindingPoint));
+
+    py::class_<GLFramebuffer, ref<GLFramebuffer>>(m, "GLFramebuffer", widget, D(GLFramebuffer))
+        .def(py::init<>(), D(GLFramebuffer, GLFramebuffer))
+        .def("init", &GLFramebuffer::init, D(GLFramebuffer, init))
+        .def("free", &GLFramebuffer::free, D(GLFramebuffer, free))
+        .def("bind", &GLFramebuffer::bind, D(GLFramebuffer, bind))
+        .def("release", &GLFramebuffer::release, D(GLFramebuffer, release))
+        .def("blit", &GLFramebuffer::blit, D(GLFramebuffer, blit))
+        .def("ready", &GLFramebuffer::ready, D(GLFramebuffer, ready))
+        .def("samples", &GLFramebuffer::samples, D(GLFramebuffer, samples))
+        .def("downloadTGA", &GLFramebuffer::downloadTGA, D(GLFramebuffer, downloadTGA));
+
+    py::class_<Arcball, ref<Arcball>>(m, "Arcball", widget, D(Arcball))
+        .def(py::init<float>(), D(Arcball, Arcball), py::arg("speedFactor") = 2.0f)
+        // TODO: would need binding for Quaternion
+        // .def("state", &Arcball::state, D(Arcball, state))
+        // .def("setState", &Arcball::setState, D(Arcball, setState))
+        .def("size", &Arcball::size, D(Arcball, size))
+        .def("setSize", &Arcball::setSize, D(Arcball, setSize))
+        .def("speedFactor", &Arcball::speedFactor, D(Arcball, speedFactor))
+        .def("setSpeedFactor", &Arcball::setSpeedFactor, D(Arcball, setSpeedFactor))
+        .def("active", &Arcball::active, D(Arcball, active))
+        .def("button", &Arcball::button, D(Arcball, button))
+        .def("motion", &Arcball::motion, D(Arcball, motion))
+        .def("matrix", &Arcball::matrix, D(Arcball, matrix));
+
+    /* GL-related helper functions from glutil.h */
+    {
+        py::module g = m.def_submodule("glutil")
+            .def("project", &project, D(project))
+            .def("unproject", &unproject, D(unproject))
+            .def("lookAt", &lookAt, D(lookAt))
+            .def("ortho", &ortho, D(ortho))
+            .def("frustum", &frustum, D(frustum))
+            .def("scale", &scale, D(scale))
+            .def("translate", &translate, D(translate));
+    }
 
     /* NanoVG calls (only a subset is supported for now) */
     {
